@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Read stdin, output HTML with QR codes."""
 
 import argparse
