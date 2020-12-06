@@ -18,6 +18,11 @@ def get_cmdline_args():
         '--version', type=int, default=16,
         help="QR code version to use (1-40, default %(default)s)",
     )
+    parser.add_argument(
+        '--ecc', choices=['L', 'M', 'Q', 'H'],
+        default='M',
+        help="error correction level (default %(default)s)",
+    )
     parser.add_argument('input', metavar='FILE', nargs='?',
                         type=argparse.FileType('r'),
                         default=sys.stdin,
@@ -42,7 +47,11 @@ def main():
     indata = indata.rstrip()
     print("Input is:", indata)
     print("Content type is", content_type(indata))
-    qr = pyqrcode.create(indata)
+    # We don't need to specify version= because pyqrcode will use the
+    # smallest version possible given the size of indata. It's okay to
+    # use a smaller version if the data (or the last chunk of data) is
+    # small.
+    qr = pyqrcode.create(indata, error=args.ecc)
     print(qr.terminal())
 
 
