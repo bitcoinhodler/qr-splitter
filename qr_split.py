@@ -48,8 +48,9 @@ def get_cmdline_args():
     )
     parser.add_argument('--title', help="title for page footer")
     parser.add_argument(
-        '--version', type=int, default=16,
-        help="QR code version to use (1-40, default %(default)s)",
+        '--version', type=int, default=16, metavar='[1-40]',
+        choices=range(1,41),
+        help="QR code version to use (default %(default)s)",
     )
     parser.add_argument(
         '--ecc', choices=['L', 'M', 'Q', 'H'],
