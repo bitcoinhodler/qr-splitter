@@ -7,13 +7,34 @@ import sys
 import pyqrcode
 
 
-def max_size(content, version, ecc):
-    """Return the max bytes per QR code for the given content and ECC level."""
-    contenttype, _ = pyqrcode.QRCode._detect_content_type(  # noqa:pylint-protected-access
-        None, content, None
-    )
-    modenum = pyqrcode.tables.modes[contenttype]
-    return pyqrcode.tables.data_capacity[version][ecc][modenum]
+class MultiQR:
+    """Represent a series of QR codes made from one big chunk of content."""
+
+    def __init__(self, content, version, ecc):
+        """Create new object."""
+        self.content = content
+        self.ecc = ecc
+        self.max_size = self._max_size(version)
+
+    def _max_size(self, version):
+        """Return the max bytes per QR code."""
+        contenttype, _ = pyqrcode.QRCode._detect_content_type(  # noqa:pylint-protected-access
+            None, self.content, None
+        )
+        modenum = pyqrcode.tables.modes[contenttype]
+        return pyqrcode.tables.data_capacity[version][self.ecc][modenum]
+
+    def __iter__(self):
+        """Yield QRCode objects from pyqrcode."""
+        content = self.content
+        while len(content) > 0:
+            chunk = content[:self.max_size]
+            content = content[self.max_size:]
+            # We don't need to specify version= because pyqrcode will
+            # use the smallest version possible given the size of
+            # chunk. It's okay to use a smaller version if the data
+            # (or the last chunk of data) is small.
+            yield pyqrcode.create(chunk, error=self.ecc)
 
 
 def get_cmdline_args():
@@ -47,14 +68,10 @@ def main():
     # Newlines require binary encoding (right?)
     indata = indata.rstrip()
     print("Input is:", indata)
-    maxsize = max_size(indata, args.version, args.ecc)
-    print("Found max size per QR code of", maxsize)
-    # We don't need to specify version= because pyqrcode will use the
-    # smallest version possible given the size of indata. It's okay to
-    # use a smaller version if the data (or the last chunk of data) is
-    # small.
-    qr = pyqrcode.create(indata, error=args.ecc)
-    print(qr.terminal())
+    mqr = MultiQR(indata, args.version, args.ecc)
+    print("Found max size per QR code of", mqr.max_size)
+    for qr in mqr:
+        print(qr.terminal())
 
 
 if __name__ == "__main__":
