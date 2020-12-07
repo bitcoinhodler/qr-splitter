@@ -7,6 +7,15 @@ import sys
 import pyqrcode
 
 
+def max_size(content, version, ecc):
+    """Return the max bytes per QR code for the given content and ECC level."""
+    contenttype, _ = pyqrcode.QRCode._detect_content_type(  # noqa:pylint-protected-access
+        None, content, None
+    )
+    modenum = pyqrcode.tables.modes[contenttype]
+    return pyqrcode.tables.data_capacity[version][ecc][modenum]
+
+
 def get_cmdline_args():
     """Parse cmdline and return Namespace."""
     parser = argparse.ArgumentParser(
@@ -28,15 +37,6 @@ def get_cmdline_args():
                         default=sys.stdin,
                         help="input file (stdin if none)")
     return parser.parse_args()
-
-
-def max_size(content, version, ecc):
-    """Return the max bytes per QR code for the given content and ECC level."""
-    contenttype, _ = pyqrcode.QRCode._detect_content_type(  # noqa:pylint-protected-access
-        None, content, None
-    )
-    modenum = pyqrcode.tables.modes[contenttype]
-    return pyqrcode.tables.data_capacity[version][ecc][modenum]
 
 
 def main():
