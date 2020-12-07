@@ -11,4 +11,14 @@ quarantined laptop.
 
 # How do I use it?
 
-I don't know. It's not developed yet.
+You need at least Python 3.7.
+
+Run `make` to build a python venv; `source venv/bin/activate` to set
+your PATH.
+
+```
+./qr_split.py --title="PSBT" my.psbt > my.html
+firefox my.html
+```
+
+Then Ctrl-P in Firefox to print!
