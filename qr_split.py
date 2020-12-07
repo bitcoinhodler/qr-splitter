@@ -30,12 +30,13 @@ def get_cmdline_args():
     return parser.parse_args()
 
 
-def content_type(content):
-    """Return the pyqrcode content type for contents."""
+def max_size(content, version, ecc):
+    """Return the max bytes per QR code for the given content and ECC level."""
     contenttype, _ = pyqrcode.QRCode._detect_content_type(  # noqa:pylint-protected-access
         None, content, None
     )
-    return contenttype
+    modenum = pyqrcode.tables.modes[contenttype]
+    return pyqrcode.tables.data_capacity[version][ecc][modenum]
 
 
 def main():
@@ -46,7 +47,8 @@ def main():
     # Newlines require binary encoding (right?)
     indata = indata.rstrip()
     print("Input is:", indata)
-    print("Content type is", content_type(indata))
+    maxsize = max_size(indata, args.version, args.ecc)
+    print("Found max size per QR code of", maxsize)
     # We don't need to specify version= because pyqrcode will use the
     # smallest version possible given the size of indata. It's okay to
     # use a smaller version if the data (or the last chunk of data) is
