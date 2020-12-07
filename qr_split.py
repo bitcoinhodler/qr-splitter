@@ -5,6 +5,7 @@ import argparse
 import contextlib
 import html
 import io
+import itertools
 import sys
 
 import pyqrcode
@@ -70,10 +71,13 @@ def print_html_for(title, qrcodes):
     print("<!DOCTYPE html>")
     print(f"<html><head><title>{htitle}</title></head><body>")
     for pagenum, qrcode in enumerate(qrcodes, 1):
-        print('<p style="margin:auto;">')
-        imgdata = qrcode.png_as_base64_str()
+        # Find scale that will be closest to 1000px wide.
+        scale = next(s for s in itertools.count(1)
+                     if qrcode.get_png_size(s) >= 1000)
+        print('<p>')
+        imgdata = qrcode.png_as_base64_str(scale)
         print(f'<img alt="QR" src="data:image/png;base64,{imgdata}"')
-        print('style="page-break-after:always; width=100%;"/>')
+        print('style="page-break-after:always;"/>')
         print('</p>')
     print("</body></html>")
 
