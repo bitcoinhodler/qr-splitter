@@ -70,7 +70,11 @@ def print_html_for(title, qrcodes):
     print("<!DOCTYPE html>")
     print(f"<html><head><title>{htitle}</title></head><body>")
     for pagenum, qrcode in enumerate(qrcodes, 1):
-        print(f"<p>{htitle} page {pagenum} of {len(qrcodes)}</p>")
+        print('<p style="margin:auto;">')
+        imgdata = qrcode.png_as_base64_str()
+        print(f'<img alt="QR" src="data:image/png;base64,{imgdata}"')
+        print('style="page-break-after:always; width=100%;"/>')
+        print('</p>')
     print("</body></html>")
 
 
@@ -85,15 +89,11 @@ def html_for(title, qrcodes):
 def main():
     """Run main cmdline program."""
     args = get_cmdline_args()
-    print(str(args))
     indata = args.input.read()
     # Newlines require binary encoding (right?)
     indata = indata.rstrip()
-    print("Input is:", indata)
     mqr = MultiQR(indata, args.version, args.ecc)
-    print("Found max size per QR code of", mqr.max_size)
-    qrcodes = list(mqr)
-    print(html_for(args.title, qrcodes))
+    print(html_for(args.title, mqr))
 
 
 if __name__ == "__main__":
