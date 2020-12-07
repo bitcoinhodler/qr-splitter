@@ -2,6 +2,9 @@
 """Read stdin, output HTML with QR codes."""
 
 import argparse
+import contextlib
+import html
+import io
 import sys
 
 import pyqrcode
@@ -60,6 +63,24 @@ def get_cmdline_args():
     return parser.parse_args()
 
 
+def print_html_for(title, qrcodes):
+    """Print HTML."""
+    htitle = html.escape(title or "")
+    print("<!DOCTYPE html>")
+    print(f"<html><head><title>{htitle}</title></head><body>")
+    for pagenum, qrcode in enumerate(qrcodes, 1):
+        print(f"<p>{htitle} page {pagenum} of {len(qrcodes)}</p>")
+    print("</body></html>")
+
+
+def html_for(title, qrcodes):
+    """Return string with HTML."""
+    output = io.StringIO()
+    with contextlib.redirect_stdout(output):
+        print_html_for(title, qrcodes)
+    return output.getvalue()
+
+
 def main():
     """Run main cmdline program."""
     args = get_cmdline_args()
@@ -70,8 +91,8 @@ def main():
     print("Input is:", indata)
     mqr = MultiQR(indata, args.version, args.ecc)
     print("Found max size per QR code of", mqr.max_size)
-    for qr in mqr:
-        print(qr.terminal())
+    qrcodes = list(mqr)
+    print(html_for(args.title, qrcodes))
 
 
 if __name__ == "__main__":
