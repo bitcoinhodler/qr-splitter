@@ -50,7 +50,7 @@ def get_cmdline_args():
     parser.add_argument('--title', help="title for page footer")
     parser.add_argument(
         '--version', type=int, default=16, metavar='[1-40]',
-        choices=range(1,41),
+        choices=range(1, 41),
         help="QR code version to use (default %(default)s)",
     )
     parser.add_argument(
@@ -70,7 +70,7 @@ def print_html_for(title, qrcodes):
     htitle = html.escape(title or "")
     print("<!DOCTYPE html>")
     print(f"<html><head><title>{htitle}</title></head><body>")
-    for pagenum, qrcode in enumerate(qrcodes, 1):
+    for _pagenum, qrcode in enumerate(qrcodes, 1):
         # Find scale that will be closest to 1000px wide.
         scale = next(s for s in itertools.count(1)
                      if qrcode.get_png_size(s) >= 1000)
